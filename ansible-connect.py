@@ -14,7 +14,7 @@ from ansible.inventory.manager import InventoryManager
 parser = argparse.ArgumentParser(description='Connect to host declared in inventory, using group name. If several hosts in group, the rank can be provided either on command line or interactively')
 parser.add_argument('--environment', '-i', required=True, help='Environment directory (containing hosts file) - or path to inventory')
 parser.add_argument('--group', '-g', required=True, help='Group name')
-parser.add_argument('--rank', '-r', required=False, help='Host rank in group')
+parser.add_argument('--rank', '-r', required=False, help='Host rank in group', type=int)
 
 args = parser.parse_args()
 
