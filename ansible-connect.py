@@ -3,11 +3,11 @@
 #
 # TODOs:
 # - optionnaly read ansible.cfg to get remote_user / or take it from the command line
-# - read inventory group/host var to get specific ansible_user value
 ############
 
 import argparse
 import os
+from re import A
 from ansible.parsing.dataloader import DataLoader
 from ansible.inventory.manager import InventoryManager
 
@@ -40,10 +40,26 @@ def connect(group, rank):
     """
     connects to a host
     """
+    get_ansible_user(group[rank])
     print("connecting to ", group[rank])
-    os.system("ssh " + group[rank])
+    user = get_ansible_user(group[rank])
+    if user is not None:
+        os.system("ssh " + user + "@" + group[rank])
+    else:
+        os.system("ssh " + group[rank])
+
     exit(0)
 
+def get_ansible_user(host):
+    """
+    Look for ansible_user variable
+    """
+    h = inventory.get_host(host)
+    for g in h.get_vars()['group_names']:
+        for var, val in inventory.groups[g].vars.items():
+            if var == "ansible_user":
+                return val
+    return None
 # Load inventory
 inventory = InventoryManager(DataLoader(), sources=args.environment)
 
@@ -53,6 +69,7 @@ if args.rank is not None:
 
 try:
     group = inventory.get_groups_dict()[args.group]
+    
 except KeyError as ke:
     error("Unknown group " + args.group)
 
